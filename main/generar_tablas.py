@@ -1,11 +1,7 @@
 import pandas as pd
+import numpy as np
 import random
 
-# def categorize_data(d, classes):
-#     for i in range(len(classes)-1):
-#         if classes[i] < d <= classes[i+1]:
-#             return classes[i+1]
-#     return classes[0]
 
 def get_class_index(d, classes):
 
@@ -18,54 +14,37 @@ def get_class_index(d, classes):
         # En caso de que el valor d este en la actual (sirve para la primer clase)
         elif d <= classes[i]:    #  <  4
             return i
-        
-
         # Si no esta en el siguiente, ni en el actual, pasa a la siguiente iteracion
-
-
-def generate_frequency_table(data, k_classes, column_name="frecuencias"):
-
-    # Se establecen valores para generar las clases
-    minimo = round(min(data),4)
-    maximo = round(max(data), 4)
-    rango = maximo-minimo
-    intervalo = round(rango/k_classes, 4)
-
-    # Se crean las clases
-    clases = [round(minimo+intervalo, 4)]
-
-    for i in range(k_classes-2):
-        clases.append(round(clases[i] + intervalo, 4))
-
-    clases.append(maximo)
+        
+def generate_frequency_table(data, k_classes):
+    # Asegurarse de que los datos son flotantes
+    data = np.array(data, dtype=float)
     
-    # Contar Frecuencias
+    # Calcular valores mínimos, máximos y el rango
+    minimo = round(np.min(data), 4)
+    maximo = round(np.max(data), 4)
+    rango = maximo - minimo
+    intervalo = round(rango / k_classes, 4)
+    
+    # Crear las clases (intervalos)
+    clases = [minimo + intervalo * i for i in range(k_classes)]
+    clases_bonito = [f"({clases[i]:.2f}; {clases[i+1]:.2f})" for i in range(k_classes-1)]
+    
+    # Contar las frecuencias
     contador_frecuencias = [0] * k_classes
-    
-
     for d in data:
-        index = get_class_index(d, clases)
-        if index is not None:
-            contador_frecuencias[index] += 1
-        else:
-            print("ERROR")
-            return "ERROR"
-
-    clases_bonito = []
-    for i, c in enumerate(clases):
-        if i == 0:
-            first = minimo
-        else:
-            first = clases[i-1]
-        b = f"({first}; {round(c,4)})"
-        clases_bonito.append(b)
-
-
-    tabla_frecuencias = pd.DataFrame({
-        "Clases": clases,
-        "Intervalos": clases_bonito,
-        "Frecuencias": contador_frecuencias
-        })
+            index = get_class_index(d, clases)
+            if index is not None:
+                contador_frecuencias[index] += 1
     
-
-    return tabla_frecuencias
+    tabla = []
+    for i in range(k_classes - 1):
+        rango = clases_bonito[i]
+        frecuencia = contador_frecuencias[i]
+        marca_clase = (clases[i] + clases[i+1]) / 2
+        tabla.append((rango, frecuencia, marca_clase))
+    
+    # Convertir la tabla a un DataFrame para mostrarla
+    df = pd.DataFrame(tabla, columns=["Rango", "Frecuencia", "Marca de Clase"])
+    
+    return df.to_string(index=False)

@@ -1,30 +1,71 @@
 import math
+import random
 
-def distribucion_normal(numeros_uniformes_0_1, media, desviacion):
+def normal(media, desv):
+    rnd1 = random.random()
+    rnd2 = random.random()
+    n1 = (((math.sqrt(-2 * math.log(rnd1))) * math.cos(2 * math.pi * rnd2)) * desv) + media
+    n2 = (((math.sqrt(-2 * math.log(rnd1))) * math.sin(2 * math.pi * rnd2)) * desv) + media
+    return n1, n2
 
-    e = math.e
 
-    numeros_distribucion_normal = []
-    if len(numeros_uniformes_0_1) % 2 != 0: # Si el array de aleatorios es impar
-        numeros_uniformes_0_1 = numeros_uniformes_0_1[:-1] # Descarta el último elemento
+""" --------------------------------------------------------   VALIDACIONES --------------------------------------------------- """
 
-    for i in range(len(numeros_uniformes_0_1)//2):
+def validar_muestra():
+    while True:
+        try:
+            
+            n = int(input("Ingrese el valor de la muestra (hasta 1.000.000 y mayor que 30): "))
+            if n > 30 and n <= 1000000:
+                break
+            else:
+                print("La muestra debe estar entre 30 y 1000000, por favor ingrese un valor válido.")
 
-        rnd_1 = numeros_uniformes_0_1[i]
-        rnd_2 = numeros_uniformes_0_1[-i - 1] # Último de la lista
-    
-        x_1 = math.sqrt(-2 * math.log(1-rnd_1, e)) * math.cos(2 * math.pi * rnd_2) * desviacion + media
-        x_2 = math.sqrt(-2 * math.log(1-rnd_1, e)) * math.sin(2 * math.pi * rnd_2) * desviacion + media
-    
-        x_1 = round(x_1, 4)
-        x_2 = round(x_2, 4)
+        except ValueError:
+            print("Por favor ingrese un número entero válido.")
 
-        numeros_distribucion_normal.append(x_1)
-        numeros_distribucion_normal.append(x_2)
+    return n
 
-    with open("datos_normal.csv", "wt") as f:
-        for e in numeros_distribucion_normal:
-            f.write(str(e)+"\n")
 
-        
-    return numeros_distribucion_normal
+def validar_intervalo_a_b():
+    while True:
+        try:
+            a = float(input("Ingrese el valor inferior del intervalo (A): "))
+            b = float(input("Ingrese el valor superior del intervalo (B): "))
+            
+            if a == 0 and b == 1:
+                print("El valor de a y b no puede ser 0 y 1 respectivamente. Por favor ingrese nuevamente los valores.")
+            else:
+                if a < b:
+                    return a, b
+                else:
+                    print("El valor de 'A' debe ser menor que el valor de 'B'. Por favor ingrese nuevamente los valores.")
+
+        except ValueError:
+            print("Por favor ingrese valores numéricos válidos.")
+
+
+def seleccionar_intervalos_histograma():
+    while True:
+        try:
+            intervalos = int(input("Seleccione el número de intervalos (10, 15, 20, 25): "))
+            if intervalos in [10, 15, 20, 25]:
+                return intervalos
+            else:
+                print("Por favor seleccione un número de intervalos válido.")
+        except ValueError:
+            print("Por favor ingrese un número entero.")
+
+
+def validar_media():
+    while True:
+        try:
+            media = float(input("Ingrese el valor de la media: "))
+            if media > 0:
+                return media
+            else:
+                print("La media debe ser un número positivo. Inténtelo de nuevo.")
+        except ValueError:
+            print("Ingrese un valor numérico para la media.")
+            
+"""----------------------------------------------------------   VALIDACIONES --------------------------------------------------- """           

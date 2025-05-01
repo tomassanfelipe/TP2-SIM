@@ -1,7 +1,11 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QFormLayout, QComboBox, QLabel, QLineEdit, QPushButton
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QFormLayout, QComboBox, QLabel,QLineEdit, QPushButton, QTextEdit)
 from PyQt5.QtGui import QIntValidator
+from proceso_numeros import procesar_uniforme, procesar_normal, procesar_exponencial  
+from generar_tablas import generate_frequency_table
+from generar_hist import full_histogram  
+from generar_numeros import generar_numeros
 
-class MiVentana(QWidget):
+class InterfazG(QWidget):
     def __init__(self):
         super().__init__()
         self.init_ui()
@@ -9,42 +13,35 @@ class MiVentana(QWidget):
     def init_ui(self):
         layout = QVBoxLayout()
 
-        # Creo el formulario de entrada
         self.form_layout = QFormLayout()
 
-        # ComboBox para seleccionar la distribución
         self.dist_combo = QComboBox(self)
         self.dist_combo.addItems(["Seleccionar Distribución", "Uniforme", "Normal", "Exponencial"])
         self.form_layout.addRow("Seleccionar Distribución:", self.dist_combo)
 
-        # Label y campo para el valor de la muestra (para uniforme y exponencial)
+        # Uniforme
         self.sample_label = QLabel("Valor de la muestra (hasta 1.000.000):")
         self.sample_input = QLineEdit()
-        # Validator para solo números
         self.sample_input.setValidator(QIntValidator(1, 1000000, self))
 
-        # Label y campo para el valor inferior (para uniforme)
         self.lower_label = QLabel("Valor Inferior A:")
         self.lower_input = QLineEdit()
         self.lower_input.setValidator(QIntValidator(self))
 
-        # Label y campo para el valor superior (para uniforme)
         self.upper_label = QLabel("Valor Superior B:")
         self.upper_input = QLineEdit()
         self.upper_input.setValidator(QIntValidator(self))
 
-        # Label y campo para el número de intervalos (para uniforme y exponencial)
         self.interval_label = QLabel("Número de Intervalos:")
         self.interval_combo = QComboBox(self)
         self.interval_combo.addItems(["10", "15", "20", "25"])
 
-        # Agregar los campos al formulario
         self.form_layout.addRow(self.sample_label, self.sample_input)
         self.form_layout.addRow(self.lower_label, self.lower_input)
         self.form_layout.addRow(self.upper_label, self.upper_input)
         self.form_layout.addRow(self.interval_label, self.interval_combo)
 
-        # Nuevos campos para la distribución normal
+        # Normal
         self.normal_sample_label = QLabel("Valor de la muestra (hasta 1.000.000):")
         self.normal_sample_input = QLineEdit()
         self.normal_sample_input.setValidator(QIntValidator(1, 1000000, self))
@@ -57,7 +54,11 @@ class MiVentana(QWidget):
         self.deviation_input = QLineEdit()
         self.deviation_input.setValidator(QIntValidator(self))
 
-        # Nuevos campos para la distribución exponencial
+        self.form_layout.addRow(self.normal_sample_label, self.normal_sample_input)
+        self.form_layout.addRow(self.mean_label, self.mean_input)
+        self.form_layout.addRow(self.deviation_label, self.deviation_input)
+
+        # Exponencial
         self.expo_sample_label = QLabel("Valor de la muestra (hasta 1.000.000):")
         self.expo_sample_input = QLineEdit()
         self.expo_sample_input.setValidator(QIntValidator(1, 1000000, self))
@@ -66,45 +67,39 @@ class MiVentana(QWidget):
         self.expo_mean_input = QLineEdit()
         self.expo_mean_input.setValidator(QIntValidator(self))
 
-        # Agregar los nuevos campos para distribución exponencial
         self.form_layout.addRow(self.expo_sample_label, self.expo_sample_input)
         self.form_layout.addRow(self.expo_mean_label, self.expo_mean_input)
 
-        # Agregar los nuevos campos para distribución normal
-        self.form_layout.addRow(self.normal_sample_label, self.normal_sample_input)
-        self.form_layout.addRow(self.mean_label, self.mean_input)
-        self.form_layout.addRow(self.deviation_label, self.deviation_input)
-
-        # Al cambiar la selección, actualizar los campos
         self.dist_combo.currentIndexChanged.connect(self.actualizar_campos)
-
-        # Agregar el formulario al layout principal
         layout.addLayout(self.form_layout)
 
-        # Botones
+       # Botones con funcionalidad
         self.boton_mostrar_numeros = QPushButton("Mostrar Números", self)
-        self.boton_histograma = QPushButton("Mostrar Histograma", self)
-        self.boton_tabla = QPushButton("Mostrar Tabla de Frecuencia", self)
+        self.boton_mostrar_numeros.clicked.connect(self.mostrar_numeros)
 
-        # Agregar los botones al layout
+        self.boton_histograma = QPushButton("Mostrar Histograma", self)
+        self.boton_histograma.clicked.connect(self.mostrar_histograma)
+        
+        self.boton_tabla = QPushButton("Mostrar Tabla de Frecuencia", self)
+        self.boton_tabla.clicked.connect(self.mostrar_tabla_frecuencia)
+
         layout.addWidget(self.boton_mostrar_numeros)
         layout.addWidget(self.boton_histograma)
         layout.addWidget(self.boton_tabla)
 
-        # Botón Volver
         self.boton_volver = QPushButton("Volver", self)
         self.boton_volver.clicked.connect(self.volver)
-
-        # Agregar el botón Volver al layout, pero estará oculto inicialmente
         layout.addWidget(self.boton_volver)
         self.boton_volver.setVisible(False)
 
-        self.setLayout(layout)
+        self.resultado_texto = QTextEdit(self)
+        self.resultado_texto.setReadOnly(True)
+        layout.addWidget(self.resultado_texto)
 
-        # Inicialmente, oculta todos los campos
+        self.setLayout(layout)
         self.actualizar_campos()
 
-        # Estilos CSS
+        #Estilos de la interfaz
         self.setStyleSheet("""
             QWidget {
                 font-size: 12pt;
@@ -144,77 +139,150 @@ class MiVentana(QWidget):
             }
         """)
 
+    #Funciones para manejar la lógica de la interfaz
     def actualizar_campos(self):
         selected_dist = self.dist_combo.currentText()
 
-        # Esconde todos los campos por defecto
-        self.sample_label.setVisible(False)
-        self.sample_input.setVisible(False)
-        self.lower_label.setVisible(False)
-        self.lower_input.setVisible(False)
-        self.upper_label.setVisible(False)
-        self.upper_input.setVisible(False)
-        self.interval_label.setVisible(False)
-        self.interval_combo.setVisible(False)
+        for widget in [
+            self.sample_label, self.sample_input,
+            self.lower_label, self.lower_input,
+            self.upper_label, self.upper_input,
+            self.interval_label, self.interval_combo,
+            self.normal_sample_label, self.normal_sample_input,
+            self.mean_label, self.mean_input,
+            self.deviation_label, self.deviation_input,
+            self.expo_sample_label, self.expo_sample_input,
+            self.expo_mean_label, self.expo_mean_input
+        ]:
+            widget.setVisible(False)
 
-        self.normal_sample_label.setVisible(False)
-        self.normal_sample_input.setVisible(False)
-        self.mean_label.setVisible(False)
-        self.mean_input.setVisible(False)
-        self.deviation_label.setVisible(False)
-        self.deviation_input.setVisible(False)
-
-        self.expo_sample_label.setVisible(False)
-        self.expo_sample_input.setVisible(False)
-        self.expo_mean_label.setVisible(False)
-        self.expo_mean_input.setVisible(False)
-
-        # Si no se ha seleccionado una distribución, no mostrar nada
         if selected_dist == "Seleccionar Distribución":
             self.boton_volver.setVisible(False)
             return
 
-        if selected_dist == "Uniforme":
-            # Mostrar solo los campos específicos para la distribución uniforme
-            self.sample_label.setVisible(True)
-            self.sample_input.setVisible(True)
-            self.lower_label.setVisible(True)
-            self.lower_input.setVisible(True)
-            self.upper_label.setVisible(True)
-            self.upper_input.setVisible(True)
-            self.interval_label.setVisible(True)
-            self.interval_combo.setVisible(True)
-
-        elif selected_dist == "Normal":
-            # Mostrar los campos específicos para la distribución normal
-            self.normal_sample_label.setVisible(True)
-            self.normal_sample_input.setVisible(True)
-            self.mean_label.setVisible(True)
-            self.mean_input.setVisible(True)
-            self.deviation_label.setVisible(True)
-            self.deviation_input.setVisible(True)
-            self.interval_label.setVisible(True)
-            self.interval_combo.setVisible(True)
-
-        elif selected_dist == "Exponencial":
-            # Mostrar los campos específicos para la distribución exponencial
-            self.expo_sample_label.setVisible(True)
-            self.expo_sample_input.setVisible(True)
-            self.expo_mean_label.setVisible(True)
-            self.expo_mean_input.setVisible(True)
-            self.interval_label.setVisible(True)
-            self.interval_combo.setVisible(True)
-
-        # Mostrar el botón Volver cuando se selecciona una distribución
         self.boton_volver.setVisible(True)
 
+        if selected_dist == "Uniforme":
+            for widget in [
+                self.sample_label, self.sample_input,
+                self.lower_label, self.lower_input,
+                self.upper_label, self.upper_input,
+                self.interval_label, self.interval_combo
+            ]:
+                widget.setVisible(True)
+
+        elif selected_dist == "Normal":
+            for widget in [
+                self.normal_sample_label, self.normal_sample_input,
+                self.mean_label, self.mean_input,
+                self.deviation_label, self.deviation_input,
+                self.interval_label, self.interval_combo
+            ]:
+                widget.setVisible(True)
+
+        elif selected_dist == "Exponencial":
+            for widget in [
+                self.expo_sample_label, self.expo_sample_input,
+                self.expo_mean_label, self.expo_mean_input,
+                self.interval_label, self.interval_combo
+            ]:
+                widget.setVisible(True)
+
+    def mostrar_numeros(self):
+        self.resultado_texto.clear()
+        distribucion = self.dist_combo.currentText()
+
+        if distribucion == "Uniforme":
+            n = self.sample_input.text()
+            a = self.lower_input.text()
+            b = self.upper_input.text()
+
+            if not n or not a or not b:
+                self.resultado_texto.setPlainText("Por favor completá todos los campos.")
+                return
+
+            try:
+                self.numeros = procesar_uniforme(n, a, b)
+                texto_resultado = "Números generados (Uniforme):\n\n"
+                texto_resultado += "\n".join(map(str, self.numeros))
+                self.resultado_texto.setPlainText(texto_resultado)
+            except Exception as e:
+                self.resultado_texto.setPlainText(f"Error: {e}")
+
+        elif distribucion == "Normal":
+            n = self.normal_sample_input.text()
+            media = self.mean_input.text()
+            desviacion = self.deviation_input.text()
+
+            if not n or not media or not desviacion:
+                self.resultado_texto.setPlainText("Por favor completá todos los campos.")
+                return
+
+            try:
+                self.numeros = procesar_normal(n, media, desviacion)
+                texto_resultado = "Números generados (Normal):\n\n"
+                texto_resultado += "\n".join(map(str, self.numeros))
+                self.resultado_texto.setPlainText(texto_resultado)
+            except Exception as e:
+                self.resultado_texto.setPlainText(f"Error: {e}")
+
+        elif distribucion == "Exponencial":
+            n = self.expo_sample_input.text()
+            media = self.expo_mean_input.text()
+
+            if not n or not media:
+                self.resultado_texto.setPlainText("Por favor completá todos los campos.")
+                return
+
+            try:
+                self.numeros = procesar_exponencial(n, media)
+                texto_resultado = "Números generados (Exponencial):\n\n"
+                texto_resultado += "\n".join(map(str, self.numeros))
+                self.resultado_texto.setPlainText(texto_resultado)
+            except Exception as e:
+                self.resultado_texto.setPlainText(f"Error: {e}")
+
+        else:
+            self.resultado_texto.setPlainText("Distribución no implementada por ahora.")
+
     def volver(self):
-        # Resetear todos los campos y volver al estado inicial
         self.dist_combo.setCurrentIndex(0)
         self.actualizar_campos()
+        self.resultado_texto.clear()
+        
+    def mostrar_histograma(self):
+        try:
+            if not hasattr(self, 'numeros') or not self.numeros:
+                self.resultado_texto.setPlainText("Primero generá los números.")
+                return
+
+            intervalos = int(self.interval_combo.currentText())
+        
+        # Llamamos a la función para mostrar el histograma
+            full_histogram(self.numeros, bins=intervalos)
+
+        except Exception as e:
+            self.resultado_texto.setPlainText(f"Error al generar histograma: {e}")        
+    
+    def mostrar_tabla_frecuencia(self):
+        try:
+            if not hasattr(self, 'numeros') or not self.numeros:
+                self.resultado_texto.setPlainText("Primero generá los números.")
+                return
+
+            intervalos = self.interval_combo.currentText()
+            tabla = generate_frequency_table(self.numeros, int(intervalos))
+            self.resultado_texto.setPlainText("Tabla de Frecuencia:\n\n" + tabla)
+
+        except Exception as e:
+            self.resultado_texto.setPlainText(f"Error al generar tabla: {e}")
+    
+    
 
 if __name__ == "__main__":
-    app = QApplication([])  
-    ventana = MiVentana()
+    app = QApplication([])
+    ventana = InterfazG()
+    ventana.setWindowTitle("Generador de Distribuciones")
+    ventana.resize(600, 700)
     ventana.show()
     app.exec_()
