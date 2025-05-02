@@ -3,8 +3,6 @@ from PyQt5.QtGui import QIntValidator
 from proceso_numeros import procesar_uniforme, procesar_normal, procesar_exponencial  
 from generar_tablas import generate_frequency_table
 from generar_hist import full_histogram  
-from generar_numeros import generar_numeros
-
 class InterfazG(QWidget):
     def __init__(self):
         super().__init__()
