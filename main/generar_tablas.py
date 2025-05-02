@@ -1,7 +1,5 @@
 import pandas as pd
 import numpy as np
-import random
-
 
 def get_class_index(d, classes):
 
