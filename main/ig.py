@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QFormLayout, QComboBox, QLabel,QLineEdit, QPushButton, QTextEdit)
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QFormLayout, QComboBox, QLabel, QLineEdit, QPushButton, QTextEdit)
 from PyQt5.QtGui import QIntValidator
 from proceso_numeros import procesar_uniforme, procesar_normal, procesar_exponencial  
 from generar_tablas import generate_frequency_table
@@ -73,7 +73,10 @@ class InterfazG(QWidget):
         self.dist_combo.currentIndexChanged.connect(self.actualizar_campos)
         layout.addLayout(self.form_layout)
 
-       # Botones con funcionalidad
+        # Botones con funcionalidad
+        self.boton_generar_numeros = QPushButton("Generar Números", self)
+        self.boton_generar_numeros.clicked.connect(self.generar_numeros)
+        
         self.boton_mostrar_numeros = QPushButton("Mostrar Números", self)
         self.boton_mostrar_numeros.clicked.connect(self.mostrar_numeros)
 
@@ -83,6 +86,7 @@ class InterfazG(QWidget):
         self.boton_tabla = QPushButton("Mostrar Tabla de Frecuencia", self)
         self.boton_tabla.clicked.connect(self.mostrar_tabla_frecuencia)
 
+        layout.addWidget(self.boton_generar_numeros)
         layout.addWidget(self.boton_mostrar_numeros)
         layout.addWidget(self.boton_histograma)
         layout.addWidget(self.boton_tabla)
@@ -99,7 +103,7 @@ class InterfazG(QWidget):
         self.setLayout(layout)
         self.actualizar_campos()
 
-        #Estilos de la interfaz
+        # Estilos de la interfaz
         self.setStyleSheet("""
             QWidget {
                 font-size: 12pt;
@@ -139,9 +143,14 @@ class InterfazG(QWidget):
             }
         """)
 
-    #Funciones para manejar la lógica de la interfaz
+    # Funciones para manejar la lógica de la interfaz
     def actualizar_campos(self):
         selected_dist = self.dist_combo.currentText()
+        
+        if hasattr(self, 'numeros'):
+            del self.numeros
+            
+        self.resultado_texto.clear()
 
         for widget in [
             self.sample_label, self.sample_input,
@@ -188,9 +197,9 @@ class InterfazG(QWidget):
             ]:
                 widget.setVisible(True)
 
-    def mostrar_numeros(self):
-        self.resultado_texto.clear()
+    def generar_numeros(self):
         distribucion = self.dist_combo.currentText()
+        self.resultado_texto.clear()
 
         if distribucion == "Uniforme":
             n = self.sample_input.text()
@@ -203,9 +212,7 @@ class InterfazG(QWidget):
 
             try:
                 self.numeros = procesar_uniforme(n, a, b)
-                texto_resultado = "Números generados (Uniforme):\n\n"
-                texto_resultado += "\n".join(map(str, self.numeros))
-                self.resultado_texto.setPlainText(texto_resultado)
+                self.resultado_texto.setPlainText("Números generados con éxito.")
             except Exception as e:
                 self.resultado_texto.setPlainText(f"Error: {e}")
 
@@ -220,9 +227,7 @@ class InterfazG(QWidget):
 
             try:
                 self.numeros = procesar_normal(n, media, desviacion)
-                texto_resultado = "Números generados (Normal):\n\n"
-                texto_resultado += "\n".join(map(str, self.numeros))
-                self.resultado_texto.setPlainText(texto_resultado)
+                self.resultado_texto.setPlainText("Números generados con éxito.")
             except Exception as e:
                 self.resultado_texto.setPlainText(f"Error: {e}")
 
@@ -236,19 +241,43 @@ class InterfazG(QWidget):
 
             try:
                 self.numeros = procesar_exponencial(n, media)
-                texto_resultado = "Números generados (Exponencial):\n\n"
-                texto_resultado += "\n".join(map(str, self.numeros))
-                self.resultado_texto.setPlainText(texto_resultado)
+                self.resultado_texto.setPlainText("Números generados con éxito.")
             except Exception as e:
                 self.resultado_texto.setPlainText(f"Error: {e}")
-
+        
         else:
             self.resultado_texto.setPlainText("Distribución no implementada por ahora.")
+
+    def mostrar_numeros(self):
+        # Solo muestra los números generados, si es que ya fueron generados
+        if not hasattr(self, 'numeros') or not self.numeros:
+            self.resultado_texto.setPlainText("Primero generá los números.")
+            return
+
+        # Muestra los números generados
+        texto_resultado = "Números generados:\n\n"
+        texto_resultado += "\n".join(map(str, self.numeros))
+        self.resultado_texto.setPlainText(texto_resultado)
 
     def volver(self):
         self.dist_combo.setCurrentIndex(0)
         self.actualizar_campos()
         self.resultado_texto.clear()
+
+        # Limpiar entradas de texto
+        for input_field in [
+            self.sample_input, self.lower_input, self.upper_input,
+            self.normal_sample_input, self.mean_input, self.deviation_input,
+            self.expo_sample_input, self.expo_mean_input
+        ]:
+            input_field.clear()
+
+        # Resetear combo de intervalos al primer valor
+        self.interval_combo.setCurrentIndex(0)
+
+        # Borrar lista de números generados
+        if hasattr(self, 'numeros'):
+            del self.numeros
         
     def mostrar_histograma(self):
         try:
@@ -258,7 +287,7 @@ class InterfazG(QWidget):
 
             intervalos = int(self.interval_combo.currentText())
         
-        # Llamamos a la función para mostrar el histograma
+            # Llamamos a la función para mostrar el histograma
             full_histogram(self.numeros, bins=intervalos)
 
         except Exception as e:
@@ -277,8 +306,6 @@ class InterfazG(QWidget):
         except Exception as e:
             self.resultado_texto.setPlainText(f"Error al generar tabla: {e}")
     
-    
-
 if __name__ == "__main__":
     app = QApplication([])
     ventana = InterfazG()
