@@ -1,48 +1,48 @@
 import pandas as pd
 import numpy as np
 
-def get_class_index(d, classes):
-
-    for i in range(len(classes)-1):
-
-        # si esta en el siguiente intervalo
-        if  classes[i] < d <= classes[i+1]:      #     2.1 < d <= 3.4
+def get_class(d, clases):
+    for i in range(len(clases)-1):
+        if  clases[i] < d <= clases[i+1]:      
             return i+1
-        
-        # En caso de que el valor d este en la actual (sirve para la primer clase)
-        elif d <= classes[i]:    #  <  4
+    
+        elif d <= clases[i]: 
             return i
-        # Si no esta en el siguiente, ni en el actual, pasa a la siguiente iteracion
+# ----------------------------------------POSIBLE MEJORA ------------------------------------------
+# def get_class(d, clases):
+#     for i in range(len(clases) - 1):
+#         if clases[i] < d <= clases[i + 1]:
+#             return i
+#     return None
+# --------------------------------------------------------------------------------------------------
         
-def generate_frequency_table(data, k_classes):
-    # Asegurarse de que los datos son flotantes
-    data = np.array(data, dtype=float)
+def generar_tabla(datos, kclases): #el kclases va poder ser 10, 15, 20 o 25
+    # Me aseguro que los datos sean tipo float
+    datos = np.array(datos, dtype=float)
     
-    # Calcular valores mínimos, máximos y el rango
-    minimo = round(np.min(data), 4)
-    maximo = round(np.max(data), 4)
+    minimo = round(np.min(datos), 4)
+    maximo = round(np.max(datos), 4)
     rango = maximo - minimo
-    intervalo = round(rango / k_classes, 4)
+    intervalo = round(rango / kclases, 4)
     
-    # Crear las clases (intervalos)
-    clases = [minimo + intervalo * i for i in range(k_classes)]
-    clases_bonito = [f"({clases[i]:.2f}; {clases[i+1]:.2f})" for i in range(k_classes-1)]
+    clases = [minimo + intervalo * i for i in range(kclases)]
+    clases_visto = [f"({clases[i]:.2f}; {clases[i+1]:.2f})" for i in range(kclases-1)] #le doy formato para que se vean bien
     
-    # Contar las frecuencias
-    contador_frecuencias = [0] * k_classes
-    for d in data:
-            index = get_class_index(d, clases)
-            if index is not None:
-                contador_frecuencias[index] += 1
+    frecuencias = [0] * kclases
+    for d in datos:
+        pos_clase = get_class(d, clases)
+        if pos_clase is not None:
+            frecuencias[pos_clase] += 1
+        else: 
+            print(f"Valor fuera de rango: {d}")
     
     tabla = []
-    for i in range(k_classes - 1):
-        rango = clases_bonito[i]
-        frecuencia = contador_frecuencias[i]
+    for i in range(kclases - 1):
+        rango = clases_visto[i]
+        frecuencia = frecuencias[i]
         marca_clase = (clases[i] + clases[i+1]) / 2
         tabla.append((rango, frecuencia, marca_clase))
-    
-    # Convertir la tabla a un DataFrame para mostrarla
+
     df = pd.DataFrame(tabla, columns=["Rango", "Frecuencia", "Marca de Clase"])
     
-    return df.to_string(index=False)
+    return df.to_string(index=False) 

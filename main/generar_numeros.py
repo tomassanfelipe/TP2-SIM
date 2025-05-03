@@ -2,23 +2,23 @@ from uniforme import uniforme
 from normal import normal
 from exponencial import exponencial
 
-def generar_numeros(distribucion, n, params):
+def generar_numeros(distribucion, n, parametros):
     if distribucion == 'Uniforme':
-        a, b = params
-        numeros = [uniforme(a, b) for _ in range(n)]
+        a, b = parametros
+        numeros = [uniforme(a, b) for i in range(n)]
 
     elif distribucion == 'Exponencial':
-        lambd = params[0]
-        numeros = [exponencial(lambd) for _ in range(n)]
+        lambd = parametros[0]
+        numeros = [exponencial(lambd) for i in range(n)]
 
     elif distribucion == 'Normal':
-        media, v = params
+        media, desviacion = parametros
         numeros = []
-        for _ in range(n // 2):
-            n1, n2 = normal(media, v)
+        for i in range(n // 2): # con n//2 me zseguro que se generen dos numeros por iteracion
+            n1, n2 = normal(media, desviacion)
             numeros.extend([n1, n2])
-        if n % 2 != 0:
-            n1, _ = normal(media, v)
-            numeros.append(n1)
+        if n % 2 != 0:  # aca verifico que si no son pares
+            n1, i = normal(media, desviacion) # genero un numero adicional
+            numeros.append(n1) # solo agrego un valor de los dos que se generan 
 
     return numeros

@@ -1,34 +1,28 @@
 from generar_numeros import generar_numeros
 
-# Procesar distribución Uniforme
-def procesar_uniforme(n_str, a_str, b_str):
-    n = int(n_str)
-    a = int(a_str)
-    b = int(b_str)
+def procesar_uniforme(n_string, a_string, b_string):
+    n = int(n_string)
+    a = int(a_string)
+    b = int(b_string)
 
     if a >= b:
-        raise ValueError("El valor inferior A debe ser menor que el valor superior B.")
-    
+        raise ValueError("El valor A debe ser menor que el valor B.")
     return generar_numeros("Uniforme", n, (a, b))
 
-# Procesar distribución Normal
-def procesar_normal(n_str, media_str, desviacion_str):
-    n = int(n_str)
-    media = int(media_str)
-    desviacion = int(desviacion_str)
+def procesar_normal(n_string, media_string, desviacion_string):
+    n = int(n_string)
+    media = int(media_string)
+    desviacion = int(desviacion_string)
 
     if desviacion <= 0:
-        raise ValueError("La desviación estándar debe ser mayor que cero.")
-    
+        raise ValueError("La desviación estándar debe ser mayor que cero.")    
     return generar_numeros("Normal", n, (media, desviacion))
 
-# Procesar distribución Exponencial
-def procesar_exponencial(n_str, media_str):
-    n = int(n_str)
-    media = int(media_str)
+def procesar_exponencial(n_string, media_string):
+    n = int(n_string)
+    media = int(media_string)
 
     if media <= 0:
         raise ValueError("La media debe ser mayor que cero.")
-    
     lambd = 1 / media
     return generar_numeros("Exponencial", n, (lambd,))

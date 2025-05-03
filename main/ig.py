@@ -1,8 +1,9 @@
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QFormLayout, QComboBox, QLabel, QLineEdit, QPushButton, QTextEdit)
 from PyQt5.QtGui import QIntValidator
-from proceso_numeros import procesar_uniforme, procesar_normal, procesar_exponencial  
-from generar_tablas import generate_frequency_table
-from generar_hist import full_histogram  
+from proceso_numeros import procesar_exponencial, procesar_normal, procesar_uniforme
+from generar_tablas import generar_tabla 
+from generar_hist import histograma  
+
 class InterfazG(QWidget):
     def __init__(self):
         super().__init__()
@@ -286,7 +287,7 @@ class InterfazG(QWidget):
             intervalos = int(self.interval_combo.currentText())
         
             # Llamamos a la función para mostrar el histograma
-            full_histogram(self.numeros, bins=intervalos)
+            histograma(self.numeros, bins=intervalos)
 
         except Exception as e:
             self.resultado_texto.setPlainText(f"Error al generar histograma: {e}")        
@@ -298,7 +299,7 @@ class InterfazG(QWidget):
                 return
 
             intervalos = self.interval_combo.currentText()
-            tabla = generate_frequency_table(self.numeros, int(intervalos))
+            tabla = generar_tabla(self.numeros, int(intervalos))
             self.resultado_texto.setPlainText("Tabla de Frecuencia:\n\n" + tabla)
 
         except Exception as e:
