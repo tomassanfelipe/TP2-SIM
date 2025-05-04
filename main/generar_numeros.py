@@ -14,11 +14,11 @@ def generar_numeros(distribucion, n, parametros):
     elif distribucion == 'Normal':
         media, desviacion = parametros
         numeros = []
-        for i in range(n // 2): # con n//2 me zseguro que se generen dos numeros por iteracion
+        for i in range(n // 2): # con n//2 aseguro que se generen dos numeros por iteracion
             n1, n2 = normal(media, desviacion)
             numeros.extend([n1, n2])
-        if n % 2 != 0:  # aca verifico que si no son pares
-            n1, i = normal(media, desviacion) # genero un numero adicional
-            numeros.append(n1) # solo agrego un valor de los dos que se generan 
+        if n % 2 != 0:  # aca verifica que si no son pares
+            n1, i = normal(media, desviacion) # genera un numero adicional
+            numeros.append(n1) # solo agrega un valor de los dos que se generan 
 
     return numeros

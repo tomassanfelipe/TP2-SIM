@@ -16,8 +16,8 @@ def get_class(d, clases):
 #     return None
 # --------------------------------------------------------------------------------------------------
         
-def generar_tabla(datos, kclases): #el kclases va poder ser 10, 15, 20 o 25
-    # Me aseguro que los datos sean tipo float
+def generar_tabla(datos, kclases): # el kclases va poder ser 10, 15, 20 o 25
+    # aegura que los datos sean tipo float
     datos = np.array(datos, dtype=float)
     
     minimo = round(np.min(datos), 4)
@@ -26,7 +26,7 @@ def generar_tabla(datos, kclases): #el kclases va poder ser 10, 15, 20 o 25
     intervalo = round(rango / kclases, 4)
     
     clases = [minimo + intervalo * i for i in range(kclases)]
-    clases_visto = [f"({clases[i]:.2f}; {clases[i+1]:.2f})" for i in range(kclases-1)] #le doy formato para que se vean bien
+    clases_visto = [f"({clases[i]:.2f}; {clases[i+1]:.2f})" for i in range(kclases-1)] # mejora el formato para que se vea ordenado
     
     frecuencias = [0] * kclases
     for d in datos:
