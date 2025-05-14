@@ -3,7 +3,7 @@ import numpy as np
 
 def get_class(d, clases): # es para que incluya un numero si es igual al limite superior de la clase
     for i in range(len(clases) - 1):
-        if clases[i] <= d < clases[i + 1]:
+        if clases[i] <= d < clases[i + 1] or np.isclose(d, clases[i + 1]):
             return i
     if d == clases[-1]:
         return len(clases) - 2
