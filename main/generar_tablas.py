@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-def get_class(d, clases):
+def get_class(d, clases): # es para que incluya un numero si es igual al limite superior de la clase
     for i in range(len(clases) - 1):
         if clases[i] <= d < clases[i + 1]:
             return i
