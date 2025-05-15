@@ -15,9 +15,9 @@ def generar_tabla(datos, kclases):
     minimo = np.min(datos)
     maximo = np.max(datos)
     rango = maximo - minimo
-    intervalo = rango / kclases
+    intervalo = rango / kclases # determina el ancho de mi intervalo
 
-    clases = [minimo + intervalo * i for i in range(kclases + 1)]
+    clases = [minimo + intervalo * i for i in range(kclases + 1)] # calculo los limites de la clase ej [0, 10, 20, 30] 
     clases_visto = [f"({clases[i]:.2f}; {clases[i+1]:.2f})" for i in range(kclases)]
     
     frecuencias = [0] * kclases
@@ -45,3 +45,6 @@ def generar_tabla(datos, kclases):
 # kclases = 
 
 # print(generar_tabla(datos, kclases))
+
+# datos = [5, 7, 12.67, 17, 23, 28]
+# print(generar_tabla(datos, 3))
