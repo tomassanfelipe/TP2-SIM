@@ -68,7 +68,7 @@ def prueba_ks(datos, distribucion, intervalos=None):
     valor_critico = 1.36 / math.sqrt(n)  # α = 0.05 (para cualquier n)
 
     conclusion = "No se rechaza" if D <= valor_critico else "Se rechaza"
-    resumen = f"--- Prueba KS ---\n"
+    resumen = f"---------- KS ---------- \n"
     resumen += f"Distribución evaluada: {distribucion}\n"
     resumen += f"N: {n}\n"
     resumen += f"Estadístico KS = {D:.4f}\n"

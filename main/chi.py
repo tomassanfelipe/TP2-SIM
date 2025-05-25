@@ -94,7 +94,7 @@ def prueba_chi_cuadrado(datos, distribucion, intervalos=10):
 
     # Resumen detallado
     resumen = (
-        f"--- Prueba Chi-Cuadrado ---\n"
+        f"---------- Chi-Cuadrado ----------\n"
         f"Distribución evaluada: {distribucion}\n"
         f"N: {n}\n"
         f"Mínimo: {min_val:.4f}\n"
@@ -107,6 +107,6 @@ def prueba_chi_cuadrado(datos, distribucion, intervalos=10):
     )
 
     if advertencias:
-        resumen += "\n--- Advertencias ---\n" + "\n".join(advertencias)
+        resumen += "\n---------- Observaciones ----------\n" + "\n".join(advertencias)
 
     return tabla, resumen
