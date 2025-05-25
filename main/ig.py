@@ -2,7 +2,9 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QFormLayout, QC
 from PyQt5.QtGui import QIntValidator
 from proceso_numeros import procesar_exponencial, procesar_normal, procesar_uniforme
 from generar_tablas import generar_tabla 
-from generar_hist import histograma  
+from generar_hist import histograma
+from ks import prueba_ks
+from chi import prueba_chi_cuadrado
 
 class InterfazG(QWidget):
     def __init__(self):
@@ -89,6 +91,14 @@ class InterfazG(QWidget):
         layout.addWidget(self.boton_mostrar_numeros)
         layout.addWidget(self.boton_histograma)
         layout.addWidget(self.boton_tabla)
+        
+        self.boton_ks = QPushButton("Mostrar KS", self)
+        self.boton_ks.clicked.connect(self.mostrar_ks)
+        layout.addWidget(self.boton_ks)
+        
+        self.boton_chi = QPushButton("Mostrar Chi-Cuadrado", self)
+        self.boton_chi.clicked.connect(self.mostrar_chi)
+        layout.addWidget(self.boton_chi)
 
         self.boton_volver = QPushButton("Volver", self)
         self.boton_volver.clicked.connect(self.volver)
@@ -196,6 +206,59 @@ class InterfazG(QWidget):
                 self.interval_label, self.interval_combo
             ]:
                 widget.setVisible(True)
+
+   # Funcion para manejar la prueba de KS
+    def mostrar_ks(self):
+        try:
+            if not hasattr(self, 'numeros') or not self.numeros:
+                self.resultado_texto.setPlainText("Primero generá los números.")
+                return
+
+            distribucion = self.dist_combo.currentText()
+            intervalos = int(self.interval_combo.currentText())
+
+            if distribucion not in ["Uniforme", "Normal", "Exponencial"]:
+                self.resultado_texto.setPlainText("Distribución no válida para KS.")
+                return
+            
+            tabla, resumen = prueba_ks(self.numeros, distribucion, intervalos)
+            
+            # Convertir tabla en string
+            tabla_str = tabla.to_string(index=False)
+
+            # Combinar todo
+            salida = f"--- Tabla de Frecuencias ---\n{tabla_str}\n\n{resumen}"
+            self.resultado_texto.setPlainText(salida)
+
+        except Exception as e:
+            self.resultado_texto.setPlainText(f"Error al calcular KS: {e}")
+            self.resultado_texto.setPlainText(resultado)
+
+    #Funcion para manejar la prueba de CHI 
+    def mostrar_chi(self):
+        try:
+            if not hasattr(self, 'numeros') or not self.numeros:
+                self.resultado_texto.setPlainText("Primero generá los números.")
+                return
+
+            distribucion = self.dist_combo.currentText()
+            intervalos = int(self.interval_combo.currentText())
+
+            if distribucion not in ["Uniforme", "Normal", "Exponencial"]:
+                self.resultado_texto.setPlainText("Distribución no válida para CHI.")
+                return
+
+            tabla, resumen = prueba_chi_cuadrado(self.numeros, distribucion, intervalos)
+
+        # Convertir tabla en string
+            tabla_str = tabla.to_string(index=False)
+
+        # Combinar todo
+            salida = f"--- Tabla de Frecuencias ---\n{tabla_str}\n\n{resumen}"
+            self.resultado_texto.setPlainText(salida)
+
+        except Exception as e:
+            self.resultado_texto.setPlainText(f"Error al calcular CHI: {e}")
 
     def generar_numeros(self):
         distribucion = self.dist_combo.currentText()  # lee que eligio el usuario
