@@ -23,6 +23,12 @@ def prueba_ks(datos, distribucion, intervalos=None):
 
     # Probabilidades esperadas y acumuladas
     Pe, PeAc, sup_limites = [], [], []
+    
+    intervalos_str = []
+    for i in range(intervalos):
+        lim_inf = min_val + i * ancho
+        lim_sup = min_val + (i + 1) * ancho
+        intervalos_str.append(f"[{lim_inf:.4f}, {lim_sup:.4f})")
 
     if distribucion == "Uniforme":
         for i in range(intervalos):
@@ -62,23 +68,24 @@ def prueba_ks(datos, distribucion, intervalos=None):
     valor_critico = 1.36 / math.sqrt(n)  # α = 0.05 (para cualquier n)
 
     conclusion = "No se rechaza" if D <= valor_critico else "Se rechaza"
-    resumen = f"--- Prueba Kolmogorov-Smirnov ---\n"
+    resumen = f"--- Prueba KS ---\n"
     resumen += f"Distribución evaluada: {distribucion}\n"
-    resumen += f"Número de datos: {n}\n"
+    resumen += f"N: {n}\n"
     resumen += f"Estadístico KS = {D:.4f}\n"
     resumen += f"Valor crítico (α = 0.05): {valor_critico:.4f}\n"
     resumen += f"Conclusión: {conclusion} la hipótesis de que los datos siguen la distribución {distribucion}"
 
     # Tabla resumen
     tabla = pd.DataFrame({
-        "Límite sup": [f"{sup:.4f}" for sup in sup_limites],
-        "Frec. Obs.": frec_obs,
+        "Intervalo": intervalos_str,
+        "FO.": frec_obs,
+        "FE": [round(p * n) for p in Pe],
         "Po": [f"{p:.4f}" for p in Po],
         "Pe": [f"{p:.4f}" for p in Pe],
         "PoAc": [f"{p:.4f}" for p in PoAc],
         "PeAc": [f"{p:.4f}" for p in PeAc],
-        "|PoAc - PeAc|": [f"{d:.4f}" for d in diferencias],
-        "MAX": ["<--" if d == D else "" for d in diferencias]
+        "|PoAc - PeAc|": [f"{d:.4f}" for d in diferencias]
+        #"MAX": ["<--" if d == D else "" for d in diferencias]
     })
 
     return tabla, resumen

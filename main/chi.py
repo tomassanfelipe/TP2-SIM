@@ -8,11 +8,11 @@ def prueba_chi_cuadrado(datos, distribucion, intervalos=10):
     n = len(datos)
 
     if n < 30:
-        advertencias.append(f"⚠️ Tamaño de muestra pequeño (n={n}). La prueba puede no ser confiable.")
+        advertencias.append(f"Tamaño de muestra pequeño (n={n})")
 
     if intervalos > n / 5:
         intervalos = max(1, int(math.sqrt(n)))
-        advertencias.append(f"⚠️ Intervalos ajustados a {intervalos} debido al tamaño de muestra.")
+        advertencias.append(f"Intervalos ajustados a {intervalos} debido al tamaño de muestra.")
 
     min_val, max_val = min(datos), max(datos)
     ancho = (max_val - min_val) / intervalos
@@ -52,7 +52,7 @@ def prueba_chi_cuadrado(datos, distribucion, intervalos=10):
         m = 2
 
     else:
-        raise ValueError("Distribución no soportada. Elija: 'Uniforme', 'Normal', o 'Exponencial'.")
+        raise ValueError("Seleccione uina distribucion adecuada.")
 
     # Agrupar intervalos con FE < 5
     i = 0
@@ -65,7 +65,7 @@ def prueba_chi_cuadrado(datos, distribucion, intervalos=10):
             frec_esp[i] += frec_esp.pop(j)
             limites_sup[i] = limites_sup.pop(j)
             limites_inf.pop(j)
-            advertencias.append(f"⚠️ Se agruparon intervalos {i} y {j} por frecuencia esperada < 5.")
+            advertencias.append(f"Se agruparon intervalos {i} y {j} por frecuencia esperada < 5.")
             i = max(0, i - 1)
         else:
             i += 1
@@ -79,28 +79,29 @@ def prueba_chi_cuadrado(datos, distribucion, intervalos=10):
     k = len(frec_esp)
     gl = max(1, k - 1 - m)
     valor_critico = chi2.ppf(0.95, gl)
-    conclusion = "✅ No se rechaza" if chi <= valor_critico else "❌ Se rechaza"
+    conclusion = "No se rechaza" if chi <= valor_critico else "Se rechaza"
 
     # Crear tabla clara
     tabla = pd.DataFrame({
         "Intervalo": [f"[{round(limites_inf[i], 4)}, {round(limites_sup[i], 4)})" for i in range(k)],
         "FO": frec_obs,
         "FE": [round(fe, 2) for fe in frec_esp],
-        "FO - FE": [round(d, 2) for d in diferencia],
-        "(FO - FE)^2": [round(d2, 2) for d2 in diferencia_cuadrado],
-        "(FO - FE)^2 / FE": [round(ci, 4) for ci in c]
+        #"FO - FE": [round(d, 2) for d in diferencia],
+        #"(FO - FE)^2": [round(d2, 2) for d2 in diferencia_cuadrado],
+        "C": [round(ci, 4) for ci in c],
+        "C(AC):": [round(ca, 4) for ca in cAc]
     })
 
     # Resumen detallado
     resumen = (
         f"--- Prueba Chi-Cuadrado ---\n"
         f"Distribución evaluada: {distribucion}\n"
-        f"Número de datos: {n}\n"
-        f"Valor mínimo: {min_val:.4f}\n"
-        f"Valor máximo: {max_val:.4f}\n"
+        f"N: {n}\n"
+        f"Mínimo: {min_val:.4f}\n"
+        f"Máximo: {max_val:.4f}\n"
         f"Número de intervalos: {k}\n"
-        f"Grados de libertad (gl): {gl}\n"
-        f"Estadístico Chi² calculado: {chi:.4f}\n"
+        f"Grados de libertad: {gl}\n"
+        f"Chi calculado: {chi:.4f}\n"
         f"Valor crítico (α = 0.05): {valor_critico:.4f}\n"
         f"Conclusión: {conclusion} la hipótesis de que los datos siguen una distribución {distribucion}.\n"
     )

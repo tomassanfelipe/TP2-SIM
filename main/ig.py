@@ -1,10 +1,13 @@
-from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QFormLayout, QComboBox, QLabel, QLineEdit, QPushButton, QTextEdit)
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QFormLayout, QComboBox, QLabel, QLineEdit, QPushButton, QTextEdit, QTableWidgetItem, QTableWidget)
 from PyQt5.QtGui import QIntValidator
 from proceso_numeros import procesar_exponencial, procesar_normal, procesar_uniforme
 from generar_tablas import generar_tabla 
 from generar_hist import histograma
 from ks import prueba_ks
 from chi import prueba_chi_cuadrado
+from tabulate import tabulate
+from PyQt5.QtGui import QFont
+from PyQt5.QtCore import Qt
 
 class InterfazG(QWidget):
     def __init__(self):
@@ -107,6 +110,9 @@ class InterfazG(QWidget):
 
         self.resultado_texto = QTextEdit(self)
         self.resultado_texto.setReadOnly(True)
+        fuente = QFont("Courier New")
+        fuente.setStyleHint(QFont.Monospace)
+        self.resultado_texto.setFont(fuente)
         layout.addWidget(self.resultado_texto)
 
         self.setLayout(layout)
@@ -223,16 +229,12 @@ class InterfazG(QWidget):
             
             tabla, resumen = prueba_ks(self.numeros, distribucion, intervalos)
             
-            # Convertir tabla en string
-            tabla_str = tabla.to_string(index=False)
-
-            # Combinar todo
+            tabla_str = tabulate(tabla, headers='keys', tablefmt='github', showindex=False)
             salida = f"--- Tabla de Frecuencias ---\n{tabla_str}\n\n{resumen}"
             self.resultado_texto.setPlainText(salida)
 
         except Exception as e:
             self.resultado_texto.setPlainText(f"Error al calcular KS: {e}")
-            self.resultado_texto.setPlainText(resultado)
 
     #Funcion para manejar la prueba de CHI 
     def mostrar_chi(self):
@@ -249,11 +251,7 @@ class InterfazG(QWidget):
                 return
 
             tabla, resumen = prueba_chi_cuadrado(self.numeros, distribucion, intervalos)
-
-        # Convertir tabla en string
-            tabla_str = tabla.to_string(index=False)
-
-        # Combinar todo
+            tabla_str = tabulate(tabla, headers='keys', tablefmt='github', showindex=False)
             salida = f"--- Tabla de Frecuencias ---\n{tabla_str}\n\n{resumen}"
             self.resultado_texto.setPlainText(salida)
 
