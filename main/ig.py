@@ -230,7 +230,7 @@ class InterfazG(QWidget):
             tabla, resumen = prueba_ks(self.numeros, distribucion, intervalos)
             
             tabla_str = tabulate(tabla, headers='keys', tablefmt='github', showindex=False)
-            salida = f"--- Tabla de Frecuencias ---\n{tabla_str}\n\n{resumen}"
+            salida = f"---------- Tabla de Frecuencias ----------\n{tabla_str}\n\n{resumen}"
             self.resultado_texto.setPlainText(salida)
 
         except Exception as e:
@@ -252,7 +252,7 @@ class InterfazG(QWidget):
 
             tabla, resumen = prueba_chi_cuadrado(self.numeros, distribucion, intervalos)
             tabla_str = tabulate(tabla, headers='keys', tablefmt='github', showindex=False)
-            salida = f"--- Tabla de Frecuencias ---\n{tabla_str}\n\n{resumen}"
+            salida = f"---------- Tabla de Frecuencias ----------\n{tabla_str}\n\n{resumen}"
             self.resultado_texto.setPlainText(salida)
 
         except Exception as e:

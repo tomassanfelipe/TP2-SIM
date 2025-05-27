@@ -32,7 +32,7 @@ def generar_tabla(datos, kclases):
     for i in range(kclases):
         rango = clases_visto[i]
         frecuencia = frecuencias[i]
-        marca_clase = round((clases[i] + clases[i+1]) / 2, 4)
+        marca_clase = round((clases[i] + clases[i+1]) / 2, 2)
         tabla.append((rango, frecuencia, marca_clase))
 
     df = pd.DataFrame(tabla, columns=["Rango", "Frecuencia", "Marca de Clase"])
