@@ -6,7 +6,7 @@ import pandas as pd
 def prueba_ks(datos, distribucion, intervalos=None):
     datos = sorted(datos)
     n = len(datos)
-    intervalos = intervalos if intervalos else int(math.sqrt(n))
+    intervalos = intervalos if intervalos else int(math.sqrt(n)) # calcular con raiz de n si no se especifica los intervalos
     minimo, maximo = min(datos), max(datos)
     ancho = (maximo - minimo) / intervalos
 
@@ -18,8 +18,8 @@ def prueba_ks(datos, distribucion, intervalos=None):
         fo[a] += 1
 
     # Probabilidades observadas y acumuladas
-    Po = [fo / n for fo in fo]
-    PoAc = np.cumsum(Po).tolist()
+    Po = [fo / n for fo in fo] # FO / n
+    PoAc = np.cumsum(Po).tolist() # calcula la suma acumulada PO
 
     # Probabilidades esperadas y acumuladas
     Pe, PeAc, sup_limites = [], [], []
@@ -32,18 +32,18 @@ def prueba_ks(datos, distribucion, intervalos=None):
 
     if distribucion == "Uniforme":
         for i in range(intervalos):
-            sup = minimo + (i + 1) * ancho
+            sup = minimo + (i + 1) * ancho # calcular el limite superior del intervalo
             sup_limites.append(sup)
-            peac = (sup - minimo) / (maximo - minimo) if maximo != minimo else 0
+            peac = (sup - minimo) / (maximo - minimo) if maximo != minimo else 0 # x-a/b-a osea x-minimo/maximo-minimo 
             PeAc.append(peac)
-        Pe = [PeAc[0]] + [PeAc[i] - PeAc[i - 1] for i in range(1, intervalos)]
+        Pe = [PeAc[0]] + [PeAc[i] - PeAc[i - 1] for i in range(1, intervalos)] # calcula la probabilidad esperada por intervalo
 
     elif distribucion == "Exponencial":
         lambd = 1 / np.mean(datos)
         for i in range(intervalos):
             sup = minimo + (i + 1) * ancho
             sup_limites.append(sup)
-            peac = 1 - math.exp(-lambd * sup) if sup >= 0 else 0
+            peac = 1 - math.exp(-lambd * sup) if sup >= 0 else 0 # 1 - e^(-lambda * x) para la exponencial
             PeAc.append(peac)
         Pe = [PeAc[0]] + [PeAc[i] - PeAc[i - 1] for i in range(1, intervalos)]
 
@@ -53,7 +53,7 @@ def prueba_ks(datos, distribucion, intervalos=None):
         for i in range(intervalos):
             sup = minimo + (i + 1) * ancho
             sup_limites.append(sup)
-            peac = norm.cdf(sup, media, desv)
+            peac = norm.cdf(sup, media, desv) # 1/desv * sqrt(2 * pi) * exp(-0.5 * ((x - media) / desv) ** 2)
             PeAc.append(peac)
         Pe = [PeAc[0]] + [PeAc[i] - PeAc[i - 1] for i in range(1, intervalos)]
 
@@ -61,7 +61,7 @@ def prueba_ks(datos, distribucion, intervalos=None):
         raise ValueError("Seleccione una distribucion adecuada")
 
     # Estadístico KS
-    diferencias = [abs(poac - peac) for poac, peac in zip(PoAc, PeAc)]
+    diferencias = [abs(poac - peac) for poac, peac in zip(PoAc, PeAc)] # |PoAc - PeAc|
     D = max(diferencias)
 
     # Valor crítico

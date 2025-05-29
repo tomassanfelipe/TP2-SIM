@@ -8,9 +8,9 @@ def prueba_chi_cuadrado(datos, distribucion, intervalos=10):
     n = len(datos)
 
     if n < 30:
-        avisos.append(f"Tamaño de muestra pequeño (n={n})")
+        avisos.append(f"Tamaño de muestra pequeño (n={n}) para CHI-Cuadrado. ")
 
-    if intervalos > n / 5:
+    if intervalos > n / 5: # si los intervalos son demasiados para n los calcula con raiz de n
         intervalos = max(1, int(math.sqrt(n)))
         avisos.append(f"Intervalos ajustados a {intervalos} debido al tamaño de muestra.")
 
@@ -35,10 +35,10 @@ def prueba_chi_cuadrado(datos, distribucion, intervalos=10):
         m = 0
 
     elif distribucion == "Exponencial":
-        lambd = 1 / np.mean(datos)
+        lambd = 1 / np.mean(datos) # eso es la media pero con una funcionalidad de una libreria
         for i in range(intervalos):
             inf, sup = max(limites_inferiores[i], 0), limites_superiores[i]
-            prob = math.exp(-lambd * inf) - math.exp(-lambd * sup)
+            prob = math.exp(-lambd * inf) - math.exp(-lambd * sup) # formula de la exponencial (1-EXP(-Lambda*limsup))-(1-EXP(-Lambda*liminf))
             fe.append(prob * n)
         m = 1
 
@@ -47,7 +47,7 @@ def prueba_chi_cuadrado(datos, distribucion, intervalos=10):
         desv = np.std(datos, ddof=0)
         for i in range(intervalos):
             inf, sup = limites_inferiores[i], limites_superiores[i]
-            prob = norm.cdf(sup, media, desv) - norm.cdf(inf, media, desv)
+            prob = norm.cdf(sup, media, desv) - norm.cdf(inf, media, desv)# formula de la normal (EXP(-0,5*((MarcaClase-Media)/DesvStd)^2))/(DesvStd*RAIZ(2*PI())))*(limsup-liminf)
             fe.append(prob * n)
         m = 2
 
@@ -71,14 +71,14 @@ def prueba_chi_cuadrado(datos, distribucion, intervalos=10):
             i += 1
 
     # Cálculos
-    diferencia = [fo - fe for fo, fe in zip(fo, fe)]
-    diferencia_cuadrado = [(d) ** 2 for d in diferencia]
-    c = [(d2 / fe if fe > 0 else 0) for d2, fe in zip(diferencia_cuadrado, fe)]
-    cAc = np.cumsum(c).tolist()
-    chi = cAc[-1]
+    diferencia = [fo - fe for fo, fe in zip(fo, fe)] #FO - FE
+    diferencia_cuadrado = [(d) ** 2 for d in diferencia] # (FO - FE)^2
+    c = [(d2 / fe if fe > 0 else 0) for d2, fe in zip(diferencia_cuadrado, fe)] # C = (FO - FE)^2 / FE
+    cAc = np.cumsum(c).tolist() # suma acumulada de C
+    chi = cAc[-1] # Chi calculado
     k = len(fe)
     gl = max(1, k - 1 - m)
-    valor_critico = chi2.ppf(0.95, gl)
+    valor_critico = chi2.ppf(0.95, gl) # valor crítico para 95% de confianza
     conclusion = "No se rechaza" if chi <= valor_critico else "Se rechaza"
 
     # Crear tabla clara
